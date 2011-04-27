@@ -49,12 +49,19 @@ function playlist(c, position) {
   write(c, 'playlistitem_'+position);
 }
 
+function completer(line) {
+  var completes = ['previous', 'play', 'pause', 'stop', 'next', 'shuffle', 'repeat', 'playlistitem_', 'progress_', 'volume_', 'mute' ];
+  return [ completes.filter(function(element) { return element.substr(0, line.length) === line }), line];
+}
+
 c.addListener('connect', function() {
   console.log('connected');
-  var r = rl.createInterface(process.stdin, process.stdout);
+  var r = rl.createInterface(process.stdin, process.stdout, completer);
   r.on('line', function(cmd) { 
     write(c, cmd); 
+    console.log('>');
   });
+  r.setPrompt('>', 1);
 });
 
 c.addListener('data', function(data) {
@@ -68,7 +75,7 @@ c.addListener('data', function(data) {
    // then the queue list elements (skipped ??)
    // then the sample rate
    // then the bit rate
-   // then the length
+   // then the length (in seconds!)
    // then the playlist position
    // then the playback status
    // then the cover (bitmap)
