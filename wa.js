@@ -1,109 +1,49 @@
-var net = require('net');
 var rl = require('readline');
+var Wa = require('./winamp-client.js');
+var client = new Wa(50000, '192.168.1.2');
 
-var c = net.createConnection(50000, '192.168.1.2');
+client.on('connect', function() {
+  console.log('connected');   
+   var r = rl.createInterface(process.stdin, process.stdout, completer);
+   r.on('line', function(cmd) { 
+      switch(cmd) {
+         case 'z':
+            client.previous();
+            break;
+         case 'x':
+            client.play();
+            break;
+         case 'c':
+            client.pause();
+            break;
+         case 'v':
+            client.stop();
+            break;
+         case 'b':
+            client.next();
+            break;
+         case 's':
+            client.shuffle();
+            break;
+         case 'r':
+            client.repeat();
+            break;
+         default:
+            client.write(cmd); 
+      }
+   });   
+   r.setPrompt('>', 1);
+});
 
-function write(c, text) {
-  c.write(text);
-  c.flush(); 
-}
+client.on('playlist', function(playlist) {
+   console.log('Received playlist of length: '+playlist.length);
+});
 
-function next(c) {
-  write(c, 'next');
-}
-
-function prev(c) {
-  write(c, 'previous');
-}
-
-function shuffle(c) {
-  write(c, 'shuffle');
-}
-
-function play(c) {
-  write(c, 'play');
-}
-
-function pause(c) {
-  write(c, 'pause');
-}
-
-function repeat(c) {
-  write(c, 'repeat');
-}
-
-function mute(c) {
-  write(c, 'mute');
-}
-
-function volume(c, volume) {
-  var vol = ((volume > 255 || volume < 0) ? 128 : volume);
-  write(c, 'volume_'+vol);
-}
-
-function progress(c, milliseconds) {
-  write(c, 'progress_'+milliseconds);
-}
-
-function playlist(c, position) {
-  write(c, 'playlistitem_'+position);
-}
+client.on('title', function (title) {
+   console.log('Title: '+title);
+});
 
 function completer(line) {
   var completes = ['previous', 'play', 'pause', 'stop', 'next', 'shuffle', 'repeat', 'playlistitem_', 'progress_', 'volume_', 'mute' ];
-  return [ completes.filter(function(element) { return element.substr(0, line.length) === line }), line];
+  return [ completes.filter(function(element) {return element.substr(0, line.length) === line}), line];
 }
-
-c.addListener('connect', function() {
-  console.log('connected');
-  var r = rl.createInterface(process.stdin, process.stdout, completer);
-  r.on('line', function(cmd) { 
-    write(c, cmd); 
-    console.log('>');
-  });
-  r.setPrompt('>', 1);
-});
-
-c.addListener('data', function(data) {
-   // first returned item is the number of tracks in the playlist
-   console.log(data.toString());
-   // then comes the playlist (item count should match the number of tracks)
-   // then comes the repeat status (1 / 0)
-   // then comes the shuffle status (1 / 0)
-   // then comes the volume (0 - 255?)
-   // then the queue list count
-   // then the queue list elements (skipped ??)
-   // then the sample rate
-   // then the bit rate
-   // then the length (in seconds!)
-   // then the playlist position
-   // then the playback status
-   // then the cover (bitmap)
-     // length
-     // cover bitmap??
-});
-
-function synchronize() {
-
-}
-
-function receive() {
-   // isplaying_ (0 not playing / 1 playing  / 3 paused)
-   // playlistPosition_ (number)
-   // samplerate_ (number)
-   // bitrate_ (number)
-   // length_ (number ???)
-   // title_ (string)
-   // stop (nothing else) = stopped
-   // coverLength_
-     // length
-     // cover
-   // pause
-   // shuffle_ (0 / 1) 
-   // repeat_ (0 / 1)
-   // volume_ (0 / 1)
-   // progress_ (number)
-   // queue_next
-}
-
-
