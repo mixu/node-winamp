@@ -1,5 +1,5 @@
 var Wa = require('./winamp-client.js');
-var client = new Wa(50001, '192.168.1.2');
+var client = new Wa(process.argv[3] || 50001, process.argv[2] || '192.168.1.2');
 // UI:
 var NodeCli = require('./node-cli.js');
 var cli = new NodeCli();
@@ -14,6 +14,7 @@ client.on('connect', function() {
    process.stdin.resume();
    process.stdin.on('keypress', function (chunk, key) {
       if (key && key.ctrl && key.name == 'c') {
+         client.end();
          process.exit();
          return;
       }

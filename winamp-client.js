@@ -191,6 +191,10 @@ Wa.prototype.write = function (text) {
    this.c.flush(); 
 };
 
+Wa.prototype.end = function() {
+   this.c.end();
+}
+
 /**
  * Playlist control functions
  */
