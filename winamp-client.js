@@ -1,4 +1,5 @@
 var net = require('net');
+var RingBuffer = require('./buffer.js');
 
 var EventEmitter = require('events').EventEmitter;
 
@@ -17,65 +18,35 @@ function Wa(port, ip) {
       self.emit('connect');
    });
    // simple string buffer
-   var buffer = new Buffer(64 * 1024);
-   var buffer_start = 0;
-   var buffer_end = 0;
-   var buffer_cursor = 0;
-   var skip = 0;
+   var rb = new RingBuffer(64 * 1024);
    var counter = 0;
    this.c.addListener('data', function(data) {
       counter++;
       var temp = 0;
       console.log(counter + "Receive: "+data.length+" skip = "+skip);
-      if(skip > data.length) {
-         console.log("Autoskipping "+data.length+" bytes of "+skip+".");
-         skip -= data.length;
+      rb.add(data);
+      var str = rb.toString();
+      if(str == '') {
          return;
       }
-      // old skip
-      if(skip > 0) {
-         // copy from the old
-         data.copy(buffer, buffer_end, skip);
-         console.log("Final skipping "+skip+" bytes of "+skip+".");
-         skip -= skip;
-      } else {
-         // copy the whole data-buffer to the end of the buffer
-         data.copy(buffer, buffer_end);
-         buffer_end += data.length;
-      }
-      var pos = bindexOf(buffer_cursor, buffer, 10);
+      var pos = str.indexOf("\n");
       // accumulate commands
       while (pos >= 0) {
          // read the command
-         var cmd = buffer.slice(buffer_cursor, pos).toString('ascii');
+         var cmd = str.substr(0, pos);
          // remove from buffer
-         buffer_cursor = pos+1;
+         rb.skip(pos);
          // call the sync function
          if(self.mode == 'wait-sync') {
-            skip += synchronize.call(self, cmd);
+            rb.skip(synchronize.call(self, cmd));
          } else {
-            skip += receive.call(self, cmd);
-         }
-         // skip binary data
-         if(skip > 0) {            
-            temp = Math.min(skip, buffer.length);
-            buffer_cursor += temp;
-            console.log(counter +"Skipping "+temp+" bytes of "+skip+".");
-            skip -= temp;
+            rb.skip(receive.call(self, cmd));
          }
          // check for another command
-         pos = bindexOf(buffer_cursor, buffer, 10);
+         str = rb.toString();
+         pos = str.indexOf("\n");
       }
    });   
-}
-
-function bindexOf(start, buffer, chr) {
-   for(; start < buffer.length; start++) {
-      if(buffer[start] == chr) {
-         return start;
-      }
-   }
-   return -1;
 }
 
 // extend EventEmitter
