@@ -17,42 +17,65 @@ function Wa(port, ip) {
       self.emit('connect');
    });
    // simple string buffer
-   var buffer = '';
+   var buffer = new Buffer(64 * 1024);
+   var buffer_start = 0;
+   var buffer_end = 0;
+   var buffer_cursor = 0;
    var skip = 0;
+   var counter = 0;
    this.c.addListener('data', function(data) {
+      counter++;
       var temp = 0;
-      buffer += data.toString();
+      console.log(counter + "Receive: "+data.length+" skip = "+skip);
+      if(skip > data.length) {
+         console.log("Autoskipping "+data.length+" bytes of "+skip+".");
+         skip -= data.length;
+         return;
+      }
       // old skip
       if(skip > 0) {
-         temp = Math.min(skip, buffer.length);
-         buffer = buffer.substring(temp + 1);            
-         console.log("Skipping "+temp+" bytes of "+skip+".");
-         skip -= temp;
-      }      
-      var pos = buffer.indexOf("\n");
+         // copy from the old
+         data.copy(buffer, buffer_end, skip);
+         console.log("Final skipping "+skip+" bytes of "+skip+".");
+         skip -= skip;
+      } else {
+         // copy the whole data-buffer to the end of the buffer
+         data.copy(buffer, buffer_end);
+         buffer_end += data.length;
+      }
+      var pos = bindexOf(buffer_cursor, buffer, 10);
       // accumulate commands
       while (pos >= 0) {
          // read the command
-         var cmd = buffer.substring(0, pos);
+         var cmd = buffer.slice(buffer_cursor, pos).toString('ascii');
          // remove from buffer
-         buffer = buffer.substring(pos + 1);
+         buffer_cursor = pos+1;
          // call the sync function
          if(self.mode == 'wait-sync') {
-            skip = synchronize.call(self, cmd);
+            skip += synchronize.call(self, cmd);
          } else {
-            skip = receive.call(self, cmd);
+            skip += receive.call(self, cmd);
          }
          // skip binary data
          if(skip > 0) {            
             temp = Math.min(skip, buffer.length);
-            buffer = buffer.substring(temp + 1);            
-            console.log("Skipping "+temp+" bytes of "+skip+".");
+            buffer_cursor += temp;
+            console.log(counter +"Skipping "+temp+" bytes of "+skip+".");
             skip -= temp;
          }
          // check for another command
-         pos = buffer.indexOf("\n");
+         pos = bindexOf(buffer_cursor, buffer, 10);
       }
    });   
+}
+
+function bindexOf(start, buffer, chr) {
+   for(; start < buffer.length; start++) {
+      if(buffer[start] == chr) {
+         return start;
+      }
+   }
+   return -1;
 }
 
 // extend EventEmitter
@@ -126,7 +149,7 @@ function synchronize(cmd) {
       }
    } else if(this.step == 13) {      
       // cover length
-      var cover_length = cmd.substr(12);
+      var cover_length = parseInt(cmd.substring(12), 10);
       console.log("COVER length "+cover_length);
       this.step++;
       this.mode = 'receive';
@@ -154,6 +177,7 @@ function receive(cmd) {
    // volume_ (0 / 1)
    // progress_ (number)
    // queue_next
+   return 0;
 }
 
 /**

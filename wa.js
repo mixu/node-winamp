@@ -3,7 +3,7 @@ var Wa = require('./winamp-client.js');
 var client = new Wa(50000, '192.168.1.2');
 
 client.on('connect', function() {
-  console.log('connected');   
+//  console.log('connected');   
    var r = rl.createInterface(process.stdin, process.stdout, completer);
    r.on('line', function(cmd) { 
       switch(cmd) {
@@ -32,15 +32,15 @@ client.on('connect', function() {
             client.write(cmd); 
       }
    });   
-   r.setPrompt('>', 1);
+//   r.setPrompt('>', 1);
 });
 
 client.on('playlist', function(playlist) {
-   console.log('Received playlist of length: '+playlist.length);
+//   console.log('Received playlist of length: '+playlist.length);
 });
 
 client.on('title', function (title) {
-   console.log('Title: '+title);
+//   console.log('Title: '+title);
 });
 
 function completer(line) {
