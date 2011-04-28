@@ -33,7 +33,7 @@ RingBuffer.prototype.add = function(buffer) {
       this.skip(overage);
    }
    this._copy(buffer, 0, buffer.length);
-   console.log('start: '+this.ring_start+' cursor: '+this.ring_cursor + ' len :'+this.content_length);
+//   console.log('start: '+this.ring_start+' cursor: '+this.ring_cursor + ' len :'+this.content_length);
 };
 
 RingBuffer.prototype._copy = function(buffer, from, to) {
@@ -78,7 +78,9 @@ RingBuffer.prototype.toString = function() {
  * This will make the content_lenght become negative, and you will only get a string back when it becomes positive..
  */
 RingBuffer.prototype.skip = function(bytes) {
-   console.log('Skip '+bytes);
+   if(bytes > 0) { 
+//      console.log('Skip '+bytes); 
+   }
    this.content_length -= bytes;
    // if you skip more than is in the buffer; or if the content is longer than the ring buffer size
    if(this.content_length < 1 || this.content_length > this.ring.length) {

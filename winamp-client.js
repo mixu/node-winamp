@@ -22,20 +22,19 @@ function Wa(port, ip) {
    var counter = 0;
    this.c.addListener('data', function(data) {
       counter++;
-      var temp = 0;
-      console.log(counter + "Receive: "+data.length+" skip = "+skip);
+//      console.log(counter + "Receive: "+data.length);
       rb.add(data);
       var str = rb.toString();
       if(str == '') {
          return;
-      }
+      }      
       var pos = str.indexOf("\n");
       // accumulate commands
       while (pos >= 0) {
          // read the command
          var cmd = str.substr(0, pos);
          // remove from buffer
-         rb.skip(pos);
+         rb.skip(pos+1);
          // call the sync function
          if(self.mode == 'wait-sync') {
             rb.skip(synchronize.call(self, cmd));
@@ -121,33 +120,67 @@ function synchronize(cmd) {
    } else if(this.step == 13) {      
       // cover length
       var cover_length = parseInt(cmd.substring(12), 10);
-      console.log("COVER length "+cover_length);
+//      console.log("COVER length "+cover_length);
       this.step++;
       this.mode = 'receive';
       // cover bitmap must be skipped
       return cover_length;
    }   
+   if(this.step < 14) {
+//      console.log(cmd);      
+   }
+   
    return 0;
 }
 
-function receive(cmd) {
-   console.log('cmd: '+cmd);
-   // isplaying_ (0 not playing / 1 playing  / 3 paused)
-   // playlistPosition_ (number)
-   // samplerate_ (number)
-   // bitrate_ (number)
-   // length_ (number ???)
-   // title_ (string)
-   // stop (nothing else) = stopped
-   // coverLength_
-     // length
-     // cover
-   // pause
-   // shuffle_ (0 / 1) 
-   // repeat_ (0 / 1)
-   // volume_ (0 / 1)
-   // progress_ (number)
-   // queue_next
+function receive(cmd) {   
+   if(cmd.substr(0, 'isplaying_'.length) == 'isplaying_') {
+      // isplaying_ (0 not playing / 1 playing  / 3 paused)
+      this.emit('playback', cmd.substr('isplaying_'.length));
+   } else if(cmd.substr(0, 'playlistPosition_'.length) == 'playlistPosition_') {
+      // playlistPosition_ (number)
+      this.emit('position', cmd.substr('playlistPosition_'.length));
+   } else if(cmd.substr(0, 'samplerate_'.length) == 'samplerate_') {
+      // samplerate_ (number)
+      this.emit('samplerate', cmd.substr('samplerate_'.length));
+   } else if(cmd.substr(0, 'bitrate_'.length) == 'bitrate_') {
+      // bitrate_ (number)
+      this.emit('bitrate', cmd.substr('bitrate_'.length));
+   } else if(cmd.substr(0, 'length_'.length) == 'length_') {
+      // length_ (number ???)
+      this.emit('length', cmd.substr('length_'.length));
+   } else if(cmd.substr(0, 'title_'.length) == 'title_') {
+      // title_ (string)
+      this.emit('title', cmd.substr('title_'.length));
+   } else if(cmd.substr(0, 'stop'.length) == 'stop') {
+      // stop (nothing else) = stopped
+      this.emit('stop');
+   } else if(cmd.substr(0, 'coverLength_'.length) == 'coverLength_') {
+      // coverLength_
+      return cmd.substr('coverLength_'.length);
+        // length
+        // cover
+   } else if(cmd.substr(0, 'pause'.length) == 'pause') {
+      // pause
+      this.emit('pause');
+   } else if(cmd.substr(0, 'shuffle_'.length) == 'shuffle_') {
+      // shuffle_ (0 / 1) 
+      this.emit('shuffle', cmd.substr('shuffle_'.length));
+   } else if(cmd.substr(0, 'repeat_'.length) == 'repeat_') {
+      // repeat_ (0 / 1)
+      this.emit('repeat', cmd.substr('repeat_'.length));
+   } else if(cmd.substr(0, 'volume_'.length) == 'volume_') {
+      // volume_ (0 - 255)
+      this.emit('volume', cmd.substr('volume_'.length));
+   } else if(cmd.substr(0, 'progress_'.length) == 'progress_') {
+      // progress_ (number)
+      this.emit('progress', cmd.substr('progress'.length));
+   } else if(cmd.substr(0, 'queue_next'.length) == 'queue_next') {
+      // queue_next
+      this.emit('queue_next');
+   } else {
+      console.log('unknown: '+cmd);
+   }
    return 0;
 }
 
