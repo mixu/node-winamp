@@ -52,7 +52,7 @@ Playback interface:
 
 Jump to with autocompletion and song selection using up/down/enter keys:
 
-![screenshot](https://github.com/mixu/node-winamp/raw/master/jump-mode.png)
+![screenshot](https://github.com/mixu/node-winamp/raw/master/jump_mode.png)
 
 ##Licence (Simplified BSD licence)
 
