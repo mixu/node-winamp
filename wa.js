@@ -1,3 +1,17 @@
+/**
+ * Simple console application for controlling Winamp over LAN.
+ * by Mikito Takada.
+ * Licenced under the BSD licence.
+ * 
+ * Simple console application which uses the node-winamp library to control Winamp.
+ * 
+ * Key benefit is that this app does not depend on node-cli; only on winamp-client.js and node-ringbuffer.js.
+ * 
+ * It doesn't have a jump to file capability -- you have to issue the playlistitem_n command manually,
+ * but simple command completion via tab is available.
+ * 
+ */
+
 var rl = require('readline');
 var Wa = require('./winamp-client.js');
 var client = new Wa(process.argv[3] || 50001, process.argv[2] || '192.168.1.2');

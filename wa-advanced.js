@@ -1,7 +1,24 @@
+/**
+ * More fancy console application for controlling Winamp over LAN.
+ * by Mikito Takada.
+ * Licenced under the BSD licence.
+ * 
+ * A console application which uses the node-winamp library to control Winamp.
+ * 
+ * Interaction is more fluid, since this app supports the zxcvb keyboard controls for
+ * playback, has a dedicated jump mode with search and autocomplete and so on.
+ * 
+ * It's still a bit on the ugly side, but I am happy that I can just switch to another
+ * terminal and press j + song name + enter to change tracks...
+ * 
+ * A more fancy app would use the event emitter capability of the node-winamp library to
+ * display a "persistent" rather than scrolling interface. Give it a go!
+ * 
+ */
 var Wa = require('./winamp-client.js');
 var client = new Wa(process.argv[3] || 50001, process.argv[2] || '192.168.1.2');
 // UI:
-var NodeCli = require('./node-cli.js');
+var NodeCli = require('./lib/node-cli.js');
 var cli = new NodeCli();
 var current = '';
 var selected = 0;
@@ -80,7 +97,6 @@ client.on('connect', function() {
                console.log("\tup - Volume up");
                console.log("\tdown - Volume down");
                break;
-//               process.stdout.write('Get Chunk: ' + chunk + '\n');
           }
        }
    });
@@ -216,6 +232,6 @@ function autocomplete(chunk, key) {
             continue;
          }
       }
-      return -1;
    }
+   return -1;
 }

@@ -1,5 +1,18 @@
+/**
+ * Ring buffer implementation for node.js
+ * by Mikito Takada.
+ * Licenced under the BSD licence.
+ * 
+ * Node.js Winamp client library for the Winamp plugin at http://code.google.com/p/remotecontrol-for-winamp/
+ * 
+ * Allows you to connect via LAN and issue commands to the plugin server.
+ * 
+ * All the usual suspects are implemented, but handling queueing is currently missing.
+ * Other than that, you can control pretty much everything via this client library.
+ *
+ */
 var net = require('net');
-var RingBuffer = require('./buffer.js');
+var RingBuffer = require('./lib/node-ringbuffer.js');
 
 var EventEmitter = require('events').EventEmitter;
 
