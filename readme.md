@@ -19,6 +19,16 @@ Run the client using:
 
 node wa-advanced.js [ip] [port]
 
+##Screenshots
+
+Playback interface:
+
+![screenshot](https://github.com/mixu/node-winamp/raw/master/playback.png)
+
+Jump to with autocompletion and song selection using up/down/enter keys:
+
+![screenshot](https://github.com/mixu/node-winamp/raw/master/jump_mode.png)
+
 ##Features
 
 There are two console clients - the better one is wa-advanced.js; it works using the same keyboard shortcuts as WinAmp:
@@ -43,16 +53,6 @@ The jump mode for wa-advanced.js supports:
 Feel free to improve upon the current client! It works well enough for me thanks to the jump functionality - but the UI could be improved.
 
 The underlying winamp-client library is an EventEmitter, so you just have to react to the various events and update the UI accordingly.
-
-##Screenshots
-
-Playback interface:
-
-![screenshot](https://github.com/mixu/node-winamp/raw/master/playback.png)
-
-Jump to with autocompletion and song selection using up/down/enter keys:
-
-![screenshot](https://github.com/mixu/node-winamp/raw/master/jump_mode.png)
 
 ##Licence (Simplified BSD licence)
 
