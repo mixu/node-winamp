@@ -11,7 +11,7 @@ function Wa(port, ip) {
    this.step = 0;
    // playlist length
    this.playlist_expected_length = 0;  
-   this.playlist = [];
+   this.playlist_data = [];
 
    this.c = net.createConnection(port, ip);
    this.c.addListener('connect', function() {
@@ -58,10 +58,10 @@ function synchronize(cmd) {
       this.step++;  
    } else if(this.step == 1) {            
       // then comes the playlist (item count should match the number of tracks)
-      this.playlist.push(cmd);
-      if(this.playlist.length == this.playlist_expected_length) {
+      this.playlist_data.push(cmd);
+      if(this.playlist_data.length == this.playlist_expected_length) {
          this.step++;
-         this.emit('playlist', this.playlist);
+         this.emit('playlist', this.playlist_data);
       }
    } else if(this.step == 2) {
       // then comes the repeat status (1 / 0)
@@ -126,63 +126,59 @@ function synchronize(cmd) {
       // cover bitmap must be skipped
       return cover_length;
    }   
-   if(this.step < 14) {
+//   if(this.step < 14) {
 //      console.log(cmd);      
-   }
+//   }
    
    return 0;
 }
 
-function receive(cmd) {   
-   if(cmd.substr(0, 'isplaying_'.length) == 'isplaying_') {
+function receive(cmd) { 
+   
+   var commands = [
       // isplaying_ (0 not playing / 1 playing  / 3 paused)
-      this.emit('playback', cmd.substr('isplaying_'.length));
-   } else if(cmd.substr(0, 'playlistPosition_'.length) == 'playlistPosition_') {
+      { msg: 'isplaying_', emit: 'playback', hasParam: true },
       // playlistPosition_ (number)
-      this.emit('position', cmd.substr('playlistPosition_'.length));
-   } else if(cmd.substr(0, 'samplerate_'.length) == 'samplerate_') {
+      { msg: 'playlistPosition_', emit: 'position', hasParam: true },
       // samplerate_ (number)
-      this.emit('samplerate', cmd.substr('samplerate_'.length));
-   } else if(cmd.substr(0, 'bitrate_'.length) == 'bitrate_') {
+      { msg: 'samplerate_', emit: 'samplerate', hasParam: true },
       // bitrate_ (number)
-      this.emit('bitrate', cmd.substr('bitrate_'.length));
-   } else if(cmd.substr(0, 'length_'.length) == 'length_') {
+      { msg: 'bitrate_', emit: 'bitrate', hasParam: true },
       // length_ (number ???)
-      this.emit('length', cmd.substr('length_'.length));
-   } else if(cmd.substr(0, 'title_'.length) == 'title_') {
+      { msg: 'length_', emit: 'length', hasParam: true },
       // title_ (string)
-      this.emit('title', cmd.substr('title_'.length));
-   } else if(cmd.substr(0, 'stop'.length) == 'stop') {
+      { msg: 'title_', emit: 'title', hasParam: true },
       // stop (nothing else) = stopped
-      this.emit('stop');
-   } else if(cmd.substr(0, 'coverLength_0'.length) == 'coverLength_0') {
+      { msg: 'stop', emit: 'stop', hasParam: false },
+      // pause
+      { msg: 'pause', emit: 'pause', hasParam: false },
+      // shuffle_ (0 / 1) 
+      { msg: 'shuffle_', emit: 'shuffle', hasParam: true },
+      // repeat_ (0 / 1)
+      { msg: 'repeat_', emit: 'repeat', hasParam: true },
+      // volume_ (0 - 255)
+      { msg: 'volume_', emit: 'volume', hasParam: true },
+      // progress_ (number)
+      { msg: 'progress_', emit: 'progress', hasParam: true },
+      // queue_next
+      { msg: 'queue_next', emit: 'queue_next', hasParam: false },
+   ];
+   for(var i = 0; i < commands.length; i++) {
+      if(cmd.substr(0, commands[i].msg.length) == commands[i].msg) { 
+         if(commands[i].hasParam) {
+            this.emit(commands[i].emit, cmd.substr(commands[i].msg.length));            
+         } else {
+            this.emit(commands[i].emit);                        
+         }
+      }
+   }   
+   if(cmd.substr(0, 'coverLength_0'.length) == 'coverLength_0') {
       // do nothing
-   } else if(cmd.substr(0, 'coverLength_'.length) == 'coverLength_') {
-      console.log(cmd);
+   } else if(cmd.substr(0, 'coverLength_'.length) == 'coverLength_') {      
       // coverLength_
         // length
         // cover
-      // return cmd.substr('coverLength_'.length);
-   } else if(cmd.substr(0, 'pause'.length) == 'pause') {
-      // pause
-      this.emit('pause');
-   } else if(cmd.substr(0, 'shuffle_'.length) == 'shuffle_') {
-      // shuffle_ (0 / 1) 
-      this.emit('shuffle', cmd.substr('shuffle_'.length));
-   } else if(cmd.substr(0, 'repeat_'.length) == 'repeat_') {
-      // repeat_ (0 / 1)
-      this.emit('repeat', cmd.substr('repeat_'.length));
-   } else if(cmd.substr(0, 'volume_'.length) == 'volume_') {
-      // volume_ (0 - 255)
-      this.emit('volume', cmd.substr('volume_'.length));
-   } else if(cmd.substr(0, 'progress_'.length) == 'progress_') {
-      // progress_ (number)
-      this.emit('progress', cmd.substr('progress'.length));
-   } else if(cmd.substr(0, 'queue_next'.length) == 'queue_next') {
-      // queue_next
-      this.emit('queue_next');
-   } else {
-      console.log('unknown: '+cmd);
+      return cmd.substr('coverLength_'.length);
    }
    return 0;
 }
@@ -191,7 +187,6 @@ function receive(cmd) {
  * Simple socket write.
  */
 Wa.prototype.write = function (text) {
-   console.log(text+"\n");
    this.c.write(text);
    this.c.flush(); 
 };
@@ -235,8 +230,12 @@ Wa.prototype.progress = function (milliseconds) {
 }
 
 Wa.prototype.volume = function (volume) {
-   var vol = ((volume > 255 || volume < 0) ? 128 : volume);
-   this.write('volume_'+vol);
+   if(volume > 255) {
+      volume = 255;
+   } else if(volume < 0) {
+      volume = 0;
+   } 
+   this.write('volume_'+volume);   
 }
 
 Wa.prototype.mute = function () {

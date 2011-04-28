@@ -97,33 +97,42 @@ var topchart = [
 
 
 var current = '';
+var selected = 0;
+var selected_index = null;
 
 function autocomplete(chunk, key) {
    if(key) {
       if(key.name.length == 1) {
          current += key.name;
       } else if(key.name == 'escape') {
-         console.log('escape');
-         return;
+         return -1;
       } else if(key.name == 'enter') {
-         console.log('enter');
-         return;
+         return selected_index;
+      } else if(key.name == 'down') {
+         selected++;
+      } else if(key.name == 'up') {
+         selected--;
       } else if(key.name == 'space') {
-         current += ' ';
+         current += ' ';         
       } else if(key.name == 'backspace') {
          current = current.substr(0, current.length-1);
       }      
+      if(selected > showed-1) {
+         selected = showed-1;
+      }
+      if(selected < 0) {
+         selected = 0;
+      }
+      if(current == '') {
+         selected_index = selected;
+      }
       cli.clear()
-         .move(1,1)      
-         .color('white')
-         .write("*********************************\n")
-         .move(2,1)      
-         .write("# "+current+"#\n")
-         .move(3,1)      
+         .up(1)      
+         .write("? "+current+"\n")
          .write("*********************************\n");
                
       var showed = 0;
-      var search = current.split(" ").filter(function(element){ return element.length > 0; });
+      var search = current.split(" ").filter(function(element){return element.length > 0;});
       var matches = [];
       for(var i = 0; i < topchart.length; i++) {
          matches = [];
@@ -138,15 +147,21 @@ function autocomplete(chunk, key) {
          if(matches.length == search.length) {            
             var from = 0;
             for(var j = 0; j < matches.length; j++) {
-               cli.color('white');
+               cli.color('white', (showed == selected));
                cli.write(topchart[i].substring(from, matches[j]));
                from = matches[j];
-               cli.color('yellow');
+               if(showed == selected) {
+                  selected_index = i;
+                  cli.color('red', true);              
+               } else {
+                  cli.color('yellow', false);              
+               }
                cli.write(topchart[i].substring(from, from+search[j].length));
                from += search[j].length;
             }
-            cli.color('white');
+            cli.color('white', (showed == selected));
             cli.write(topchart[i].substring(from)+"\n");
+            cli.color('white');
             showed++;
             if(showed == 5) {
                break;
