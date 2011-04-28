@@ -155,11 +155,14 @@ function receive(cmd) {
    } else if(cmd.substr(0, 'stop'.length) == 'stop') {
       // stop (nothing else) = stopped
       this.emit('stop');
+   } else if(cmd.substr(0, 'coverLength_0'.length) == 'coverLength_0') {
+      // do nothing
    } else if(cmd.substr(0, 'coverLength_'.length) == 'coverLength_') {
+      console.log(cmd);
       // coverLength_
-      return cmd.substr('coverLength_'.length);
         // length
         // cover
+      // return cmd.substr('coverLength_'.length);
    } else if(cmd.substr(0, 'pause'.length) == 'pause') {
       // pause
       this.emit('pause');
