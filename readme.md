@@ -1,15 +1,17 @@
 
 # node-winamp
 
-Node.js client application and bindings for remote controlling Winamp over LAN. 
+Node.js client application and bindings for remote controlling Winamp over LAN.
 
 Thank you Martin Schlodinski for releasing the Winamp plugin needed to control playback as open source! Get his app from the Android App Market, it's awesome:
 
 https://market.android.com/details?id=com.RemoteControl
 
+*New* Updated to work with RemoteControl for Winamp version 1.00 and to use substack's Buffers.
+
 ##Getting started
 
-You need to use Winamp 5.5+ and install the remote control plugin from: 
+You need to use Winamp 5.5+ and install the remote control plugin from:
 
 http://code.google.com/p/remotecontrol-for-winamp/
 
@@ -23,11 +25,11 @@ node wa-advanced.js [ip] [port]
 
 Playback interface:
 
-![screenshot](https://github.com/mixu/node-winamp/raw/master/playback.png)
+![screenshot](https://github.com/mixu/node-winamp/raw/master/lib/playback.png)
 
 Jump to with autocompletion and song selection using up/down/enter keys:
 
-![screenshot](https://github.com/mixu/node-winamp/raw/master/jump_mode.png)
+![screenshot](https://github.com/mixu/node-winamp/raw/master/lib/jump_mode.png)
 
 ##Features
 

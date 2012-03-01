@@ -1,0 +1,13 @@
+{
+  "name": "node-winamp",
+  "description": "Control winamp from Node over LAN",
+  "version": "0.0.2",
+  "author": {
+    "name": "Mikito Takada",
+    "email": "mikito.takada@gmail.com",
+    "url": "http://blog.mixu.net/"
+    },
+  "dependencies": {
+    "buffers": "0.1.x"
+  }
+}

@@ -2,20 +2,20 @@
  * More fancy console application for controlling Winamp over LAN.
  * by Mikito Takada.
  * Licenced under the BSD licence.
- * 
+ *
  * A console application which uses the node-winamp library to control Winamp.
- * 
+ *
  * Interaction is more fluid, since this app supports the zxcvb keyboard controls for
  * playback, has a dedicated jump mode with search and autocomplete and so on.
- * 
+ *
  * It's still a bit on the ugly side, but I am happy that I can just switch to another
  * terminal and press j + song name + enter to change tracks...
- * 
+ *
  * A more fancy app would use the event emitter capability of the node-winamp library to
  * display a "persistent" rather than scrolling interface. Give it a go!
- * 
+ *
  */
-var Wa = require('./winamp-client.js');
+var Wa = require('./lib/winamp-client.js');
 var client = new Wa(process.argv[3] || 50001, process.argv[2] || '192.168.1.2');
 // UI:
 var NodeCli = require('./lib/node-cli.js');
@@ -27,8 +27,8 @@ var current_volume = 0;
 
 client.on('connect', function() {
    var jump_mode = false;
-   require('tty').setRawMode(true);    
    process.stdin.resume();
+   require('tty').setRawMode(true);
    process.stdin.on('keypress', function (chunk, key) {
       if (key && key.ctrl && key.name == 'c') {
          client.end();
@@ -44,7 +44,7 @@ client.on('connect', function() {
          } else if(track == -2) {
             jump_mode = false;
             cli.clear();
-         }         
+         }
       } else if(key) {
          switch(key.name) {
             case 'z':
@@ -175,10 +175,10 @@ function autocomplete(chunk, key) {
       } else if(key.name == 'up') {
          selected--;
       } else if(key.name == 'space') {
-         current += ' ';         
+         current += ' ';
       } else if(key.name == 'backspace') {
          current = current.substr(0, current.length-1);
-      }      
+      }
       if(selected > showed-1) {
          selected = showed-1;
       }
@@ -189,10 +189,10 @@ function autocomplete(chunk, key) {
          selected_index = selected;
       }
       cli.clear()
-         .up(1)      
+         .up(1)
          .write("? "+current+"\n")
          .write("*********************************\n");
-               
+
       var showed = 0;
       var search = current.split(" ").filter(function(element){return element.length > 0;});
       var matches = [];
@@ -200,13 +200,13 @@ function autocomplete(chunk, key) {
          matches = [];
          for(var j = 0; j < search.length; j++) {
             var pos = topchart[i].toLowerCase().indexOf(search[j]);
-            if( pos > -1) {               
+            if( pos > -1) {
                matches.push(pos);
-            } else {               
+            } else {
               break;
             }
          }
-         if(matches.length == search.length) {            
+         if(matches.length == search.length) {
             var from = 0;
             for(var j = 0; j < matches.length; j++) {
                cli.color('white', (showed == selected));
@@ -214,9 +214,9 @@ function autocomplete(chunk, key) {
                from = matches[j];
                if(showed == selected) {
                   selected_index = i;
-                  cli.color('red', true);              
+                  cli.color('red', true);
                } else {
-                  cli.color('yellow', false);              
+                  cli.color('yellow', false);
                }
                cli.write(topchart[i].substring(from, from+search[j].length));
                from += search[j].length;
@@ -228,7 +228,7 @@ function autocomplete(chunk, key) {
             if(showed == 5) {
                break;
             }
-         } else { 
+         } else {
             continue;
          }
       }
