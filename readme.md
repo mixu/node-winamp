@@ -1,4 +1,3 @@
-
 # node-winamp
 
 Node.js client application and bindings for remote controlling Winamp over LAN.
@@ -25,11 +24,11 @@ node wa-advanced.js [ip] [port]
 
 Playback interface:
 
-![screenshot](https://github.com/mixu/node-winamp/raw/master/lib/playback.png)
+![screenshot](https://github.com/mixu/node-winamp/raw/master/doc/playback.png)
 
 Jump to with autocompletion and song selection using up/down/enter keys:
 
-![screenshot](https://github.com/mixu/node-winamp/raw/master/lib/jump_mode.png)
+![screenshot](https://github.com/mixu/node-winamp/raw/master/doc/jump_mode.png)
 
 ##Features
 
